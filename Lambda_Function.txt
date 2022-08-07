@@ -1,0 +1,93 @@
+import psycopg2
+import boto3
+
+
+conn = psycopg2.connect(host="rdsforgutta.cbktdobfilfl.us-east-1.rds.amazonaws.com",
+    				database="gutta_database",
+    				user="postgres",
+    				password="JSQQ5ZZOg0QNYfMSBgNM")
+
+def lambda_handler(event, context):
+    # TODO implement
+    cursor = conn.cursor()
+    cursor.execute('SELECT emailone FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index1 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT emailtwo FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index2 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT emailthree FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index3 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT emailfour FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index4 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT emailfive FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index5 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    cursor = conn.cursor()
+    cursor.execute('SELECT filename FROM accounts  ORDER BY user_id DESC LIMIT 1')
+    end_index6 = cursor.fetchone()[0]
+    conn.commit()
+    
+    
+    s3 = boto3.client('s3',
+                      aws_access_key_id='AKIA4FOGJIMT6HHKLXRC',
+                      aws_secret_access_key='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',
+                      )
+
+    url = boto3.client('s3').generate_presigned_url(
+        ClientMethod='get_object',
+        Params={'Bucket': 'guttaprojectbucket', 'Key': end_index6},
+        ExpiresIn=5000)
+
+    ses = boto3.client('ses', region_name='us-east-1')
+
+    body = f"""<html>
+    <head></head>
+    <body>
+      <h2>Email Testing </h2>
+      <br/>
+      <p>link below</p>
+    </body>
+    </html>
+            """ + url
+            
+
+    email_message = {
+        'Body': {
+            'Html': {
+                'Charset': 'utf-8',
+                'Data': body,
+            },
+        },
+        'Subject': {
+            'Charset': 'utf-8',
+            'Data': " AWS SES Email Sen",
+        },
+    }
+    
+    ses.send_email(
+        Destination={
+            'ToAddresses': [end_index1, end_index2, end_index3, end_index4, end_index5],
+        },
+        Message=email_message,
+        Source='yashnagutta27@gmail.com'
+    )
+
+
+   
